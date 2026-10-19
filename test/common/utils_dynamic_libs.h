@@ -98,7 +98,8 @@ LIBRARY_HANDLE OpenLibrary(const char *name)
     if (MultiByteToWideChar(CP_UTF8, 0, name, -1, wlibrary, MAX_PATH) == 0) return false;
     return ::LoadPackagedLibrary(wlibrary, 0);
 #else
-    return ::LoadLibrary(name);
+    // NeverSight, 2026-10-19: this helper accepts narrow library names.
+    return ::LoadLibraryA(name);
 #endif
 #else
     return dlopen(name, RTLD_NOW|RTLD_GLOBAL);

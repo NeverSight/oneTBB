@@ -456,6 +456,10 @@ if (TARGET TBB::tbb)
     endif()
 
     tbb_add_test(SUBDIR tbb NAME test_dynamic_link)
+    if (WIN32)
+        # Exercise the narrow loader with Unicode-enabled embedding projects.
+        target_compile_definitions(test_dynamic_link PRIVATE UNICODE _UNICODE)
+    endif()
     add_dependencies(test_dynamic_link TBB::tbb)
     target_include_directories(test_dynamic_link PRIVATE
         $<TARGET_PROPERTY:TBB::tbb,INTERFACE_INCLUDE_DIRECTORIES>)
