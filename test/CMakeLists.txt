@@ -451,6 +451,13 @@ if (TARGET TBB::tbb)
     # Define the tests
     tbb_add_test(SUBDIR tbb NAME test_tick_count DEPENDENCIES TBB::tbb)
     tbb_add_test(SUBDIR tbb NAME test_allocators DEPENDENCIES TBB::tbb)
+    if (TBB_USE_SYSTEM_ALLOCATOR AND TARGET TBB::tbbmalloc)
+        tbb_add_test(SUBDIR tbb NAME test_system_allocator DEPENDENCIES TBB::tbb)
+        add_dependencies(test_system_allocator TBB::tbbmalloc)
+        target_compile_definitions(test_system_allocator PRIVATE
+            "AVAILABLE_MALLOC_LIBRARY=\"$<TARGET_FILE:TBB::tbbmalloc>\"")
+    endif()
+
     if (NOT TBB_TCM_TESTING)
         tbb_add_test(SUBDIR tbb NAME test_arena_priorities DEPENDENCIES TBB::tbb)
     endif()

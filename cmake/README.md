@@ -53,6 +53,15 @@ Some useful options:
 - `-G <generator>` - specify particular project generator. See `cmake --help` for details.
 - `-DCMAKE_BUILD_TYPE=Debug` - specify for Debug build. It is not applicable for multi-config generators, e.g., Microsoft* Visual Studio* generator.
 
+#### Process allocator selection
+
+`-DTBB_USE_SYSTEM_ALLOCATOR=ON` makes the scheduler and `tbb_allocator` use
+process `malloc`/`free` and the standard aligned-allocation fallback, even when
+`tbbmalloc` is available. It disables discovery and loading of that allocator;
+it does not replace the process allocator. This supports applications that
+already select an allocator such as mimalloc. The option defaults to `OFF`.
+`TBBMALLOC_BUILD=OFF` alone only disables building the sidecar, not discovery.
+
 #### TBBBind Library Configuration
 
 > **_TIP:_** It is recommended to install the HWLOC* library. See [oneTBB documentation](https://uxlfoundation.github.io/oneTBB/GSG/next_steps.html#hybrid-cpu-and-numa-support) for details.

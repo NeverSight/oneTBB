@@ -28,6 +28,10 @@
 
 #include <cstdlib>
 
+#ifndef __TBB_USE_SYSTEM_ALLOCATOR
+#define __TBB_USE_SYSTEM_ALLOCATOR 0
+#endif
+
 #ifdef _WIN32
 #include <windows.h>
 #else
@@ -52,7 +56,7 @@
 #define __TBB_USE_MSVC_ALIGNED_MALLOC
 #endif
 
-#if __TBB_WEAK_SYMBOLS_PRESENT
+#if __TBB_WEAK_SYMBOLS_PRESENT && !__TBB_USE_SYSTEM_ALLOCATOR
 
 #pragma weak scalable_malloc
 #pragma weak scalable_free
@@ -100,6 +104,7 @@ cache_aligned_allocate_handler_type cache_aligned_allocate_handler_unsafe = null
 //! Handler for padded memory deallocation
 static void (*cache_aligned_deallocate_handler)(void* p) = nullptr;
 
+#if !__TBB_USE_SYSTEM_ALLOCATOR
 //! Table describing how to link the handlers.
 static const dynamic_link_descriptor MallocLinkTable[] = {
     DLD(scalable_malloc, allocate_handler_unsafe),
@@ -128,13 +133,18 @@ static const dynamic_link_descriptor MallocLinkTable[] = {
 #error Unknown OS
 #endif
 
+#endif // !__TBB_USE_SYSTEM_ALLOCATOR
+
 //! Initialize the allocation/free handler pointers.
 /** Caller is responsible for ensuring this routine is called exactly once.
     The routine attempts to dynamically link with the TBB memory allocator.
     If that allocator is not found, it links to malloc and free. */
 void initialize_handler_pointers() {
     __TBB_ASSERT(allocate_handler == &initialize_allocate_handler, nullptr);
-    bool success = dynamic_link(MALLOCLIB_NAME, MallocLinkTable, 4);
+    bool success = false;
+#if !__TBB_USE_SYSTEM_ALLOCATOR
+    success = dynamic_link(MALLOCLIB_NAME, MallocLinkTable, 4);
+#endif
     if(!success) {
         // If unsuccessful, set the handlers to the default routines.
         // This must be done now, and not before FillDynamicLinks runs, because if other
